@@ -1,32 +1,32 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, {Component} from 'react';
 
-const App = () => {
-  const profiles = [
-    {name: "Taro", age: 10},
-    {name: "Hanako", age: 5},
-    {name: "NoName", age: 3}
-  ]
-  return (
-    <div>
-      {
-        profiles.map((profile, index) => {
-          return <User name={profile.name} age={profile.age} key={index}/>
-        })
-      }
-    </div>
-  )
-}
+const App = () => (<Counter></Counter>)
 
-const User = (props) => {
-return <div>Hi, i am {props.name}, and {props.age} years old! </div>
-}
+class Counter extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {count:0}
+  }
+  handlePlusButton = () => {
+    this.setState({ count: this.state.count + 1})
+  }
+  handleMinusButton = () => {
+    this.setState({ count: this.state.count - 1})
+  }
 
-// 型チェック 受け取るプロパティの型がブレないように初めに定義しておく
-User.propTypes = {
-  name: PropTypes.string,
-                        // ↓ age属性が存在しないとダメですよと言うエラーを出すためにある物
-  age: PropTypes.number.isRequired
+  // setStateが実行されると実はrenderが実行される
+  // setStateが実行されるたびにそのコールバックが再度実行される。
+  // なので状態を変えるときは必ずsetStateを使う事
+  // それを使っていればその状態に関連するdomが自動的に再度描画される。
+  render() {
+    return (
+      <React.Fragment>
+        <div>count: {this.state.count}</div>
+        <button onClick={this.handlePlusButton}>+1</button>
+        <button onClick={this.handleMinusButton}>-1</button>
+      </React.Fragment>
+    )
+  }
 }
 
 export default App;
