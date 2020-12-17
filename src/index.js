@@ -11,7 +11,6 @@ import EventsIndex from './components/events_index';
 import EventsNew from './components/events_new';
 import reportWebVitals from './reportWebVitals';
 
-
 const store = createStore(reducer, applyMiddleware(thunk))
 
 ReactDOM.render(
