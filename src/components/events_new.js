@@ -5,8 +5,6 @@ import { Link } from 'react-router-dom';
 import { postEvent } from '../actions'
 
 class EventsNew extends Component {
-  // ↓onSubmitがイニシャライズした時にバインドされる
-  // こうすることでこのclassのインスタンスでこのonSubmitのメソッドが使える状態になる
   constructor(props) {
     super(props)
     this.onSubmit = this.onSubmit.bind(this)
@@ -20,21 +18,20 @@ class EventsNew extends Component {
       </div>
     )
   }
-  // ↓非同期処理
   async onSubmit(values) {
     await this.props.postEvent(values)
     this.props.history.push('/')
   }
   render() {
-    // ↓handleSubmitと言う関数はrenderが実行された時に渡ってくる関数
-    const { handleSubmit } = this.props
+                                // ↓submitボタンを押したときに１度しか押せない(submit連打押し防止)
+    const { handleSubmit, pristine, submitting } = this.props
 
     return (
       <form onSubmit={handleSubmit(this.onSubmit)}>
         <div><Field label="Title" name="title" type="text" component={this.renderField} /></div>
         <div><Field label="Body" name="body" type="text" component={this.renderField} /></div>
         <div>
-          <input type="submit" value="Submit" disabled={false} />
+          <input type="submit" value="Submit" disabled={pristine || submitting} />
           <Link to="/" >Cancel</Link>
         </div>
       </form>
@@ -50,8 +47,6 @@ const validate = values => {
 }
 const mapDispatchToProps = ({ postEvent })
 
-// ↓mapDispatchToProps をconnectでバインドする。
-// このComponentに関連づくactionである事を指定する為の処理を書かないとエラーになる。
 export default connect(null, mapDispatchToProps)(
   reduxForm({ validate, form: 'eventNewForm' })(EventsNew)
 )
