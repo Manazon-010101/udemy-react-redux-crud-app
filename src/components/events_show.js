@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import { Field, reduxForm } from 'redux-form';
 import { Link } from 'react-router-dom';
 
-// ↓ イベントに関する情報を取得する。
 import { getEvent, deleteEvent, putEvent } from '../actions'
 
 class EventsShow extends Component {
@@ -12,6 +11,13 @@ class EventsShow extends Component {
     this.onSubmit = this.onSubmit.bind(this)
     this.onDeleteClick = this.onDeleteClick.bind(this)
   }
+
+  // ↓ レンダリングが完了したらgetEventと言うアクションをEvent情報から拾ってくる処理
+  componentDidMount() {
+    const { id } = this.props.match.params
+    if (id) this.props.getEvent(id)
+  }
+
   renderField(field) {
     const { input, label, type, meta: { touched, error } } = field
     return (
@@ -22,15 +28,13 @@ class EventsShow extends Component {
     )
   }
   async onDeleteClick() {
-    // ↓オブジェクトなのでこれを書くとpramsのidが拾える
     const { id } = this.props.match.params
-    // ↓このidをactionに渡してあげる
     await this.props.deleteEvent(id)
     this.props.history.push('/')
   }
 
   async onSubmit(values) {
-    // await this.props.postEvent(values)
+    await this.props.postEvent(values)
     this.props.history.push('/')
   }
   render() {
@@ -56,8 +60,16 @@ const validate = values => {
   if (!values.body) errors.body = "Enter a body, please."
   return errors
 }
-const mapDispatchToProps = ({ deleteEvent })
 
-export default connect(null, mapDispatchToProps)(
-  reduxForm({ validate, form: 'eventShowForm' })(EventsShow)
+const mapStateToProps = (state, ownProps) => {
+  const event = state.events[ownProps.match.params.id]
+  // ↓ 初期状態でどんな値を表示するのかと言う初期状態をここから設定する
+  return { initialValues: event, event }
+}
+
+const mapDispatchToProps = ({ deleteEvent, getEvent, putEvent })
+
+export default connect(mapStateToProps, mapDispatchToProps)(
+                                                // ↓initialValuesの値が変わる度にfromが毎回初期化される
+  reduxForm({ validate, form: 'eventShowForm', enableReinitialize: true })(EventsShow)
 )
