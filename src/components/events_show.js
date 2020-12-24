@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Field, reduxForm } from 'redux-form';
 import { Link } from 'react-router-dom';
+import RisedButton from 'material-ui/RaisedButton';
+import TextField from 'material-ui/TextField';
 
 import { getEvent, deleteEvent, putEvent } from '../actions'
 
@@ -12,7 +14,6 @@ class EventsShow extends Component {
     this.onDeleteClick = this.onDeleteClick.bind(this)
   }
 
-  // ↓ レンダリングが完了したらgetEventと言うアクションをEvent情報から拾ってくる処理
   componentDidMount() {
     const { id } = this.props.match.params
     if (id) this.props.getEvent(id)
@@ -21,10 +22,14 @@ class EventsShow extends Component {
   renderField(field) {
     const { input, label, type, meta: { touched, error } } = field
     return (
-      <div>
-        <input {...input} placeholder={label} type={type} />
-        {touched && error && <span>{error}</span>}
-      </div>
+      <TextField
+        hintText={label}
+        floatingLabelText={label}
+        type={type}
+        errorText={touched && error}
+        {...input}
+        fullWidth={true}
+      />
     )
   }
   async onDeleteClick() {
@@ -38,16 +43,18 @@ class EventsShow extends Component {
     this.props.history.push('/')
   }
   render() {
-    const { handleSubmit, pristine, submitting } = this.props
+    const { handleSubmit, pristine, submitting, invalid } = this.props
+    const style = { margin:12 }
 
     return (
       <form onSubmit={handleSubmit(this.onSubmit)}>
         <div><Field label="Title" name="title" type="text" component={this.renderField} /></div>
         <div><Field label="Body" name="body" type="text" component={this.renderField} /></div>
+
         <div>
-          <input type="submit" value="Submit" disabled={pristine || submitting} />
-          <Link to="/" >Cancel</Link>
-          <Link to="/" onClick={this.onDeleteClick}>Delete</Link>
+          <RisedButton label="Submit" type="submit" style={style} disabled={pristine || submitting || invalid} />
+          <RisedButton label="Cancel" style={style} containerElement={<Link to="/" />} />
+          <RisedButton label="Delete" style={style} onClick={this.onDeleteClick} />
         </div>
       </form>
     )
@@ -63,13 +70,11 @@ const validate = values => {
 
 const mapStateToProps = (state, ownProps) => {
   const event = state.events[ownProps.match.params.id]
-  // ↓ 初期状態でどんな値を表示するのかと言う初期状態をここから設定する
   return { initialValues: event, event }
 }
 
 const mapDispatchToProps = ({ deleteEvent, getEvent, putEvent })
 
 export default connect(mapStateToProps, mapDispatchToProps)(
-                                                // ↓initialValuesの値が変わる度にfromが毎回初期化される
   reduxForm({ validate, form: 'eventShowForm', enableReinitialize: true })(EventsShow)
 )
